@@ -1,0 +1,189 @@
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    /*background-color: #242424;*/
+    background-color: #ffffff;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+
+a:hover {
+    color: #535bf2;
+}
+
+body {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    background: rgba(255,255,255,0.005);
+    /*margin: 0;*/
+    /*display: flex;*/
+    /*place-items: center;*/
+    /*min-width: 320px;*/
+    /*min-height: 100vh;*/
+}
+
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+}
+
+button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+button:hover {
+    border-color: #646cff;
+}
+
+.card {
+    padding: 2em;
+}
+
+#app {
+    /*max-width: 1280px;*/
+    /*margin: 0 auto;*/
+    /*padding: 2rem;*/
+    /*text-align: center;*/
+    -webkit-app-region: drag;
+}
+
+/*图标*/
+.el-icon {
+    -webkit-app-region: no-drag;
+}
+
+.el-input {
+    -webkit-app-region: no-drag;
+}
+
+.el-button {
+    -webkit-app-region: no-drag;
+}
+
+.el-tabs {
+    -webkit-app-region: no-drag;
+}
+
+.el-aside {
+    -webkit-app-region: no-drag;
+}
+
+.el-main {
+    -webkit-app-region: no-drag;
+}
+
+.el-popup-parent--hidden{
+    /*弹窗背景*/
+    /*解决在root窗口处于小窗口的时候，弹窗显示后root窗口右边多出一部分空白*/
+    width: 100% !important;
+}
+
+/*设置编辑器的弹窗位置*/
+.w-e-drop-panel{
+    top: -1060% !important;
+}
+
+p{
+    margin: 0;
+}
+
+/*新的弹窗按钮样式*/
+.el-message-box__btns > .el-button{
+    background: rgba(76, 175, 80, 0.8); /* 半透明的按钮背景 */
+    color: white; /* 按钮文字颜色 */
+    border: none; /* 去除边框 */
+    border-radius: 5px; /* 圆角 */
+    padding: 10px 20px; /* 内边距 */
+    font-size: 16px; /* 字体大小 */
+    cursor: pointer; /* 鼠标指针 */
+    transition: background 0.3s, box-shadow 0.3s; /* 背景色和阴影变化效果 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 增加阴影以提升层次感 */
+}
+.el-message-box__btns > .el-button:hover{
+    background: rgba(76, 175, 80, 1); /* hover 状态时背景变得不透明 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* 增加阴影 */
+}
+
+/*--------------------------------自定义按钮---------------------------------*/
+/*关闭按钮*/
+.close-button {
+    /*取消按钮*/
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    transition: background 0.3s ease;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.close-button:hover {
+    background: rgba(255, 50, 50, 0.8);
+    transform: translateY(-3px) scale(1.03);
+    transition: transform 0.3s ease;
+}
+.close-button:not(:hover) {
+    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(0) scale(1);
+    transition: background 0.5s ease, transform 0.5s ease-in-out;
+}
+/*保存按钮*/
+.save-button {
+    /*保存按钮*/
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    transition: background 0.3s ease;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.save-button:hover {
+    background: rgba(102, 255, 102, 0.8);
+    transform: translateY(-3px) scale(1.03);
+    transition: transform 0.3s ease;
+}
+.save-button:not(:hover) {
+    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(0) scale(1);
+    transition: background 0.5s ease, transform 0.5s ease-in-out;
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button {
+        background-color: #f9f9f9;
+    }
+}
