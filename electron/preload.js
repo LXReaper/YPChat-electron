@@ -35,7 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
         let validChannels = [
             'fromMain',
             'window-size-update',
-            'screen-sources',
+            'screenShot-sources',
             'screenshots-ok',
             'saveImage-ok',// 图片文件保存成功
         ];

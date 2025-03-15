@@ -72,9 +72,29 @@ const defaultOption = ref({//窗口的默认配置
 // 1、创建主窗口
 function createWindow() {
     win = new BrowserWindow(defaultOption.value);
-    // win.loadFile('./index.html');  // 确保加载的是 UTF-8 编码的 HTML 文件
+    // win.loadFile(path.join(__dirname, "dist", "index.html"));  // 发布时使用
     // win.webContents.openDevTools({mode: 'detach'}); // 打开开发者工具
-    win.loadURL(baseURL);
+    // win.loadURL(baseURL);
+    let isDevProcess = process.env.VITE_DEV_SERVER_URL;
+    if (isDevProcess) {
+        win.loadURL(process.env.VITE_DEV_SERVER_URL);
+        win.webContents.openDevTools({mode: 'detach'}); // 打开开发者工具
+    } else {
+        // win.loadFile(path.join(__dirname, "../dist/index.html"));
+        // win.loadURL(baseURL);
+        // win.webContents.openDevTools({mode: 'detach'}); // 打开开发者工具
+    }
+
+    // 快捷键控制
+    win.webContents.on('before-input-event', (event, input) => {
+        if (input.type === 'keyDown' && !isDevProcess) {
+            if (input.key === 'F12' ||
+                (input.control && input.key === 'i') ||
+                (input.control && input.key === 'r')) {
+                event.preventDefault(); // 阻止默认行为
+            }
+        }
+    });
 
     win.on('ready-to-show', () => {
         win.show()
@@ -391,7 +411,7 @@ ipcMain.on('completeLogin', (event, userData) => {
     //1、显示窗口
     curWin.show();
     //2、连接数据库
-    dbInit(userData);// 初始化连接数据库
+    // dbInit(userData);// 初始化连接数据库
 });
 // 重新登录
 ipcMain.on('reLogin', (event, args) => {
@@ -441,7 +461,7 @@ ipcMain.on("desktop-capture", async (event, args) => {
     })
         .then(async (sources) => {
             console.log(sources, '主进程获取到可以调用的所有屏幕信息');
-            curWin.webContents.send("screen-sources", sources);
+            curWin.webContents.send("screenShot-sources", sources);
             return sources
             // for(const source of sources) {
             //     if (source.name === 'Entire Screen') {

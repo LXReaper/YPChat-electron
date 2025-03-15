@@ -22,19 +22,19 @@
       }">
         <el-header style="padding: 0 0;border-bottom: rgb(237, 237, 237) solid 1px">
           <!--            分屏-->
-          <div class="basicTab1" style="right: 120px;">
+          <div class="basicTab1" style="right: 120px;" v-if="isElectron">
             <win-split />
           </div>
           <!--            最小化-->
-          <div class="basicTab1" style="right: 80px;" @click="minimize">
+          <div class="basicTab1" style="right: 80px;" @click="minimize" v-if="isElectron">
             <Minus/>
           </div>
           <!--            最大化-->
-          <div class="basicTab1" style="right: 40px;" @click="maximize">
+          <div class="basicTab1" style="right: 40px;" @click="maximize" v-if="isElectron">
             <FullScreen/>
           </div>
           <!--            关闭-->
-          <div @click="close" class="basicTab2">
+          <div @click="close" class="basicTab2" v-if="isElectron">
             <Close/>
           </div>
           <!--            聊天头部信息-->
@@ -52,14 +52,15 @@
 </template>
 
 <script setup lang="ts">
-import BasicMenu from "../components/basic/basicMenu.vue";
-import MessageHistoryPage from "../components/basic/messageHistoryPage.vue";
+import BasicMenu from "../components/Basic/basicMenu.vue";
+import MessageHistoryPage from "../components/Basic/messageHistoryPage.vue";
 import {Close, FullScreen, Minus} from "@element-plus/icons-vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router";
-import NoteBookPage from "../components/basic/NoteBookPane/noteBookPage.vue";
+import NoteBookPage from "../components/Basic/NoteBookPane/noteBookPage.vue";
 import WinSplit from "../components/MyIcons/win-split.vue";
-import ChatHeader from "../components/basic/ChatPane/chatHeader.vue";
+import ChatHeader from "../components/Basic/ChatPane/chatHeader.vue";
+import store from "../store";
 
 const route = useRoute();
 
@@ -68,24 +69,39 @@ const preWinHeight = ref(window.outerHeight);
 const winHeight = ref(window.outerHeight);
 //获取自定义electronAPI上下文
 let electron = (window as any).electronAPI;
+const isElectron = ref(store.state.basicData.isElectron);
 
 const minimize = () => {
-  electron.sendMessage('minimize-window', "最小化窗口");
+  if (isElectron.value) {
+    electron.sendMessage('minimize-window', "最小化窗口");
+  }
 }
 const maximize = () => {
-  // 传入原始窗口大小和位置
-  electron.sendMessage('maximize-window', {
-    tag: '最大化窗口',
-  });
+  if (isElectron.value) {
+    // 传入原始窗口大小和位置
+    electron.sendMessage('maximize-window', {
+      tag: '最大化窗口',
+    });
+  }
 }
 const close = () => {
-  electron.sendMessage('closeWin', "关闭窗口");
+  if (isElectron.value) {
+    electron.sendMessage('closeWin', "关闭窗口");
+  }
 }
 
 window.addEventListener('resize', ()=>{
   preWinHeight.value = winHeight.value;
-  winHeight.value = window.outerHeight;
+  winHeight.value = isElectron.value ? window.outerHeight : window.innerHeight;
 });
+
+onMounted(() => {
+  isElectron.value = store.state.basicData.isElectron;
+  if (!isElectron.value) {
+    preWinHeight.value = window.innerHeight;
+    winHeight.value = window.innerHeight;
+  }
+})
 </script>
 
 <style scoped>

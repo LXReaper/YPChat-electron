@@ -7,7 +7,6 @@
     <div class="sk-chase-dot"></div>
     <div class="sk-chase-dot"></div>
   </div>
-
 </template>
 <script setup lang="ts">
 import {defineProps, withDefaults} from "vue";

@@ -1,14 +1,14 @@
 <template>
   <div id="container" ref="container">
-    <div class="basicTab1" style="right: 120px;">
+    <div class="basicTab1" style="right: 120px;" v-if="isElectron">
       <Setting />
       <div class="tooltip" style="right: -18px;width: 60px;user-select: none;">设置</div>
     </div>
-    <div class="basicTab1" style="right: 70px;" @click="minimize">
+    <div class="basicTab1" style="right: 70px;" @click="minimize" v-if="isElectron">
       <Minus />
       <div class="tooltip" style="right: -23px;width: 70px;user-select: none;">最小化</div>
     </div>
-    <div @click="closeWin" class="basicTab2">
+    <div @click="closeWin" class="basicTab2" v-if="isElectron">
       <Close />
       <div class="tooltip" style="right: -18px;width: 60px;user-select: none;">关闭</div>
     </div>
@@ -200,13 +200,13 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {Avatar, Close, Key, Minus, Setting, User} from "@element-plus/icons-vue";
 import {useRouter} from "vue-router";
 import {UserService} from "../api/Services/UserService.ts";
 import {ElMessage, ElNotification} from "element-plus";
-import {initWs} from '../utils/network/wsClient.js'
-import {getUserInfoStorage, setUserInfoStorage} from '../utils/storageUtil.js'
+import {initWs} from '../utils/network/wsClient.ts'
+import {getUserInfoStorage, setUserInfoStorage} from '../utils/storageUtil.ts'
 import store from "../store";
 import Github from "../components/MyIcons/github.vue";
 import Gitlab from "../components/MyIcons/gitlab.vue";
@@ -214,6 +214,7 @@ import Instagram from "../components/MyIcons/instagram.vue";
 import {debounce} from "../utils/debounceThrottle.ts";
 import Mail from "../components/MyIcons/mail.vue";
 import {MailService} from "../api/Services/mailService.ts";
+import AuthorityCtrl from "../access/authorityCtrl.ts";
 
 //是否为登录界面
 const isLogin = ref(true);
@@ -221,6 +222,7 @@ const isMailLogin = ref(false);// 是否使用邮箱登录
 const isMailRegister = ref(false);// 是否使用邮箱注册
 //获取自定义electronAPI上下文
 let electron = (window as any).electronAPI;
+const isElectron = ref(store.state.basicData.isElectron);
 
 const router = useRouter();
 
@@ -255,6 +257,57 @@ const closeWin = () => {
   electron.sendMessage('closeWin', '关闭窗口');
 }
 
+onMounted(() => {
+  let isElectronApp = !!(window as any).electronAPI;
+  if (!isElectronApp) {
+    ElNotification({
+      title: '建议使用最新版客户端，体验会更佳!!!',
+      message: `
+            <a
+                style="color: #0066FF"
+                href='https://ypchat-1326794969.cos.ap-guangzhou.myqcloud.com/app_release/MineChat%20Setup%200.0.1.exe'>
+                点击下载最新客户端
+            </a>`,
+      type: "warning",
+      duration: 5000,
+      dangerouslyUseHTMLString: true, // 允许使用 HTML
+    });
+  }
+  store.dispatch("basicData/setIsElectron", isElectronApp);
+  isElectron.value = isElectronApp;
+
+  // 获取当前登录用户信息
+  console.log("正在检测本地是否登录过...");
+  store.dispatch("user/getLoginUser").then(() => {
+    let userInfo = store.state.user.loginUser;
+    if (userInfo.userRole && userInfo.userRole != AuthorityCtrl.NOT_LOGIN) {
+      ElMessage.success("登录成功");
+      if (isElectron.value) {
+        // 窗口中页面跳转
+        electron.sendMessage('switchPage', {
+          x: 300,
+          y: 150,
+          width: 1300,
+          height: 840,
+          maximizable: true,
+          enableResizable: true,//登录成功后的界面允许窗口缩放
+        });
+      }
+      router.push({
+        path: "/chat",
+      }).then(() => {
+        let curUserInfo = getUserInfoStorage();
+        if (isElectron.value) {
+          electron.sendMessage('completeLogin', {
+            ...curUserInfo
+          });
+        }
+        initWs(curUserInfo);// 连接服务器
+      });
+    }else console.log("获取用户信息失败，请先进行登录");
+  });
+})
+
 /* 登录*/
 const isTimeOut = ref(false); //验证码是否倒计时
 const cnt = ref(60); //邮箱获取验证码倒计时
@@ -277,23 +330,27 @@ const loginSuccessHandle = (res: any) => {// 登录成功处理
   });
   store.dispatch("user/getLoginUser").then(() => {
     ElMessage.success("登录成功");
-    // 窗口中页面跳转
-    electron.sendMessage('switchPage', {
-      x: 300,
-      y: 150,
-      width: 1300,
-      height: 840,
-      maximizable: true,
-      enableResizable: true,//登录成功后的界面允许窗口缩放
-    });
+    if (isElectron.value) {
+      // 窗口中页面跳转
+      electron.sendMessage('switchPage', {
+        x: 300,
+        y: 150,
+        width: 1300,
+        height: 840,
+        maximizable: true,
+        enableResizable: true,//登录成功后的界面允许窗口缩放
+      });
+    }
     router.push({
       path: "/chat",
     }).then(() => {
-      electron.sendMessage('completeLogin', {
-        ...res.data,
-        userAccount: loginInfo.value.account,
-        userPassword: loginInfo.value.password,
-      });
+      if (isElectron.value) {
+        electron.sendMessage('completeLogin', {
+          ...res.data,
+          userAccount: loginInfo.value.account,
+          userPassword: loginInfo.value.password,
+        });
+      }
       initWs(getUserInfoStorage());// 连接服务器
     });
   });

@@ -40,9 +40,9 @@ export type WsChangeAudioContentHintType = BasicMessageData<{
 }>;
 
 export type WsChangeBasicSettingsType = {
-    maxBitrate: WsChangeMaxBitrateType;
-    maxFramerate: WsChangeMaxFramerateType;
-    resolutionRatio: WsChangeResolutionRatioType;
-    videoContentHint: WsChangeVideoContentHintType;
-    audioContentHint: WsChangeAudioContentHintType;
+    maxBitrate: number;
+    maxFramerate: number;
+    resolutionRatio: number;
+    videoContentHint: string;
+    audioContentHint: string;
 };

@@ -17,7 +17,7 @@ export const base_request = (
         axios({
             headers: headers,
             method: method,
-            baseURL: api.devBaseUrl,
+            baseURL: api.baseUrl,
             url: url,
             data: data,
             params: method === 'get' ? data : {},
@@ -30,7 +30,7 @@ export const base_request = (
             // 先处理一波
             if (res.data.code === ErrorCode.NOT_LOGIN_ERROR.code) {
                 // 未登录处理，重新登录
-                reLogin("reLogin", ErrorCode.NOT_LOGIN_ERROR.text);
+                reLogin(1000, ErrorCode.NOT_LOGIN_ERROR.text);
             }
             resolve(res.data);
         })

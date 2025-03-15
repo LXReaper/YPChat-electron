@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import AddIcon from "../components/MyIcons/add-icon.vue";
 import ChatIcon from "../components/MyIcons/chat-icon.vue";
 import LightingIcon from "../components/MyIcons/lighting-icon.vue";
@@ -50,6 +50,9 @@ import PlanIcon from "../components/MyIcons/plan-icon.vue";
 import FullScreenPlayIcon from "../components/MyIcons/full-screen-play-icon.vue";
 import ComputerIcon from "../components/MyIcons/computer-icon.vue";
 import router from "../router";
+import store from "../store";
+
+const isElectron = ref(store.state.basicData.isElectron);
 
 //获取自定义electronAPI上下文
 let electron = (window as any).electronAPI;
@@ -62,45 +65,58 @@ const hover_button_index = ref(-1);
 const winHeight = ref(window.outerHeight);
 
 window.addEventListener('resize', () => {
-  winHeight.value = window.outerHeight;
+  winHeight.value = isElectron.value ? window.outerHeight : window.innerHeight;
 });
 
+onMounted(() => {
+  isElectron.value = store.state.basicData.isElectron;
+  if (!isElectron.value) {
+    winHeight.value = window.innerHeight;
+  }
+})
 
 /**
  * 加入会议
  */
 const joinConference = () => {
-  if (!electron) router.push({
-    path: "/dialog/video/Conference/join",
-  });// 网页端使用
-  electron.sendMessage('openChildWindow',{
-    winName: "conference_join",
-    path: "/dialog/video/Conference/join",
-    resizable: false,
-    x: 300,
-    y: 150,
-    width: 380,
-    height: 660,
-    maximizable: false //不允许放大
-  })
+  if (isElectron.value) {
+    electron.sendMessage('openChildWindow',{
+      winName: "conference_join",
+      path: "/dialog/video/Conference/join",
+      resizable: false,
+      x: 300,
+      y: 150,
+      width: 380,
+      height: 660,
+      maximizable: false //不允许放大
+    })
+  }else {// 网页端使用
+    router.push({
+      path: "/dialog/video/Conference/join",
+    });
+  }
+
 }
 
 /**
  * 快速会议
  */
 const quickConference = () => {
-  if (!electron) router.push({
-    path: "/view/video/Conference",
-  });// 网页端使用
-  electron.sendMessage('openChildWindow', {
-    winName: "conference_view",
-    path: "/view/video/Conference",
-    resizable: true,
-    x: 300,
-    y: 150,
-    width: 1300,
-    height: 840,
-  })
+  if (isElectron.value) {
+    electron.sendMessage('openChildWindow', {
+      winName: "conference_view",
+      path: "/view/video/Conference",
+      resizable: true,
+      x: 300,
+      y: 150,
+      width: 1300,
+      height: 840,
+    })
+  }else {// 网页端使用
+    router.push({
+      path: "/view/video/Conference",
+    });
+  }
 }
 </script>
 

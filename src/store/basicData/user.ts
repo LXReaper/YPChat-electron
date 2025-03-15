@@ -2,11 +2,18 @@
 // @ts-nocheck
 /* eslint-disable */
 import { StoreOptions } from "vuex";
-import { ElMessage } from "element-plus";
+import {ElMessage} from "element-plus";
 import {UserService} from "../../api/Services/UserService.ts";
 import AuthorityCtrl from "../../access/authorityCtrl.ts";
-import {setUserInfoStorage, getUserInfoStorage, testUserInfoExpireTime, USER_INFO_KEY} from "../../utils/storageUtil.js"
+import {
+  setUserInfoStorage,
+  getUserInfoStorage,
+  testUserInfoExpireTime,
+  removeUserInfoStorage
+} from "../../utils/storageUtil.ts"
 import store from "../index.ts";
+import {initWs, isWsConnect} from "../../utils/network/wsClient.ts";
+import {mLoadingAnimation} from "../../utils/elementUtils";
 
 export const user = {
   namespaced: true,
@@ -21,10 +28,12 @@ export const user = {
   actions: {
     // actions,执行异步操作,并触发mutations的修改
     async getLoginUser({ commit, state }, payload) {
+      const loading = mLoadingAnimation("1e1e1e");
+
       //从远程(即后端)获取用户信息
       const res = await UserService.getLoginUserUsingGet();
       if (res.code === 0) {
-        commit("updateUser", res.data);
+        commit("setUserInfoData", res.data);
 
         /* localStorage操作持久化用户信息*/
         let userOldInfo = getUserInfoStorage();
@@ -36,21 +45,27 @@ export const user = {
         //每隔5s检测一次
         const testUserInfoIntervalId = setInterval(() => {
           let expireStatus = testUserInfoExpireTime();
-          if (expireStatus) clearInterval(testUserInfoIntervalId);// 过期了就无需再检测
+          if (expireStatus) {
+            clearInterval(testUserInfoIntervalId);// 过期了就无需再检测
+          }else {// 没有过期
+            // 判断与后端服务器连接是否正常
+            if (!isWsConnect()) initWs(getUserInfoStorage());
+          }
         },5000);
       } else {
-        commit("updateUser", {
+        commit("setUserInfoData", {
           ...state.loginUser,
           userRole: AuthorityCtrl.NOT_LOGIN,
         });
       }
+      loading.close();// 关闭加载动画
     },
     async getLoginUserFromBackend({ commit, state }, payload) {
       //从远程(即后端)获取用户信息
       const res = await UserService.getLoginUserUsingGet();
-      if (res.code === 0) commit("updateUser", res.data);
+      if (res.code === 0) commit("setUserInfoData", res.data);
       else {
-        commit("updateUser", {
+        commit("setUserInfoData", {
           ...state.loginUser,
           userRole: AuthorityCtrl.NOT_LOGIN,
         });
@@ -77,6 +92,9 @@ export const user = {
       }
       commit("setCurActive", payload);
     },
+    clearAllData({ commit, state }){
+      commit("clearAllData");
+    }
   },
   // mutations,修改状态变量
   mutations: {
@@ -113,5 +131,12 @@ export const user = {
     setCurActive(state, payload) {
       state.userMenuData.curActive = payload;
     },
+    // 清空用户相关信息
+    clearAllData(state) {
+      state.loginUser = {
+        userName: "登录 注册",
+      };
+      removeUserInfoStorage();
+    }
   },
 } as StoreOptions<any>;

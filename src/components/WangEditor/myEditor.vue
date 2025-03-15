@@ -46,6 +46,7 @@ import store from "../../store";
 import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
 import {extractImgSrcWithRegex, getHtmlInnerImgCount} from "../../utils/StringUtils.js";
 import {MsgTypeConstant} from "../../constant/MsgTypeConstant.ts";
+import {setCurContactorInfoStorage} from "../../utils/storageUtil.ts";
 
 interface Props {
   valueHtml: string;
@@ -161,22 +162,31 @@ const menu1Conf = {
     `);
     phone.setExec((editor) => {
       // 发起电话
-      //获取自定义electronAPI上下文
-      let electron = (window as any).electronAPI;
-      electron.sendMessage('openChildWindow', {
-        winName: "phone_chat",
-        path: "/phone/chat",
-        resizable: false,
-        x: 300,
-        y: 150,
-        width: 400,
-        height: 760,
-        maximizable: false, //不允许放大
-        transportObj: JSON.stringify({
+      let isElectron = store.state.basicData.isElectron;
+      if (isElectron) {
+        //获取自定义electronAPI上下文
+        let electron = (window as any).electronAPI;
+        electron.sendMessage('openChildWindow', {
+          winName: "phone_chat",
+          path: "/phone/chat",
+          resizable: false,
+          x: 300,
+          y: 150,
+          width: 400,
+          height: 760,
+          maximizable: false, //不允许放大
+          transportObj: JSON.stringify({
+            ...store.getters["basicData/getCurContactor"],
+            msgType: MsgTypeConstant.JOIN_ROOM,
+          }),
+        })
+      }else {
+        setCurContactorInfoStorage({
           ...store.getters["basicData/getCurContactor"],
           msgType: MsgTypeConstant.JOIN_ROOM,
-        }),
-      })
+        });
+        window.open("/#/phone/chat", "_blank");
+      }
     });
     return phone;
   }
@@ -193,22 +203,31 @@ const menu2Conf = {
     `);
     phoneVideoMenu.setExec((editor) => {
       // 发起视频电话
-      //获取自定义electronAPI上下文
-      let electron = (window as any).electronAPI;
-      electron.sendMessage('openChildWindow', {
-        winName: "video_chat",
-        path: "/video/chat",
-        resizable: false,
-        x: 300,
-        y: 150,
-        width: 400,
-        height: 760,
-        maximizable: false, //不允许放大
-        transportObj: JSON.stringify({
+      let isElectron = store.state.basicData.isElectron;
+      if (isElectron) {
+        //获取自定义electronAPI上下文
+        let electron = (window as any).electronAPI;
+        electron.sendMessage('openChildWindow', {
+          winName: "video_chat",
+          path: "/video/chat",
+          resizable: false,
+          x: 300,
+          y: 150,
+          width: 400,
+          height: 760,
+          maximizable: false, //不允许放大
+          transportObj: JSON.stringify({
+            ...store.getters["basicData/getCurContactor"],
+            msgType: MsgTypeConstant.JOIN_ROOM,
+          }),
+        })
+      }else {
+        setCurContactorInfoStorage({
           ...store.getters["basicData/getCurContactor"],
           msgType: MsgTypeConstant.JOIN_ROOM,
-        }),
-      })
+        });
+        window.open("/#/video/chat", "_blank");
+      }
     })
     return phoneVideoMenu;
   }
@@ -225,9 +244,12 @@ const cutMenu3Conf = {
       </svg>
     `)
     cutPictureMenu.setExec((editor) => {
-      // 发起截图
-      let electron = (window as any).electronAPI;
-      electron.sendMessage('screenshots-start', {});
+      let isElectron = store.state.basicData.isElectron;
+      if (isElectron) {
+        // 发起截图
+        let electron = (window as any).electronAPI;
+        electron.sendMessage('screenshots-start', {});
+      }
     })
     return cutPictureMenu;
   }
@@ -245,7 +267,6 @@ const recordAudioMenu4Conf = {
        </svg>
     `);
     recordAudioMenu.setExec((editor) => {
-
       if (!recordAudioMenu.getStatus()) {
         // 开始录音
         recordAudioMenu.setStatus(true);
@@ -272,17 +293,20 @@ const module = {
 /*组件事件*/
 // 组件加载时
 onMounted(() => {
-  // 监听截图发送
-  let electron = window.electronAPI;
-  electron.onReceiveMessage("screenshots-ok", (args: any) => {
-    console.log('screenshots-ok', args);
-    console.log('screenshots-ok', args.filePath);// 图片存放的临时路径
-    if (editorRef.value && args.base64) {
-      let editor = editorRef.value;
-      // 插入截图图片base64数据
-      editor.dangerouslyInsertHtml(`<img src='${args.base64}' style="width: 100px;height: 100px" />`)
-    }
-  })
+  let isElectron = store.state.basicData.isElectron;
+  if (isElectron) {
+    // 监听截图发送
+    let electron = window.electronAPI;
+    electron.onReceiveMessage("screenshots-ok", (args: any) => {
+      console.log('screenshots-ok', args);
+      console.log('screenshots-ok', args.filePath);// 图片存放的临时路径
+      if (editorRef.value && args.base64) {
+        let editor = editorRef.value;
+        // 插入截图图片base64数据
+        editor.dangerouslyInsertHtml(`<img src='${args.base64}' style="width: 100px;height: 100px" />`)
+      }
+    })
+  }
 })
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {

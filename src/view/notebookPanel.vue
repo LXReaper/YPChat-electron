@@ -2,7 +2,7 @@
   <div id="notebookPanel" :style="{height: (curWinHeight - 60) + 'px'}">
     <el-empty style="height: 100%" v-if="!store.state.noteBookPanelData.isShow">
       <template #image>
-        <el-image src="../../public/minecraftDragon.gif" style="user-select: none;pointer-events: none;" />
+        <el-image src="minecraftDragon.gif" style="user-select: none;pointer-events: none;" />
       </template>
       <template #description>
         <text style="color: #ccc;user-select: none">MineChat</text>
@@ -21,17 +21,26 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import store from "../store";
-import NewFriendApplyPage from "../components/basic/NoteBookPane/newFriendApplyPage.vue";
-import ContactorsBySearchPage from "../components/basic/NoteBookPane/contactorsBySearchPage.vue";
-import MyContactorsPage from "../components/basic/NoteBookPane/myContactorsPage.vue";
+import NewFriendApplyPage from "../components/Basic/NoteBookPane/newFriendApplyPage.vue";
+import ContactorsBySearchPage from "../components/Basic/NoteBookPane/contactorsBySearchPage.vue";
+import MyContactorsPage from "../components/Basic/NoteBookPane/myContactorsPage.vue";
+
+const isElectron = ref(store.state.basicData.isElectron);
 
 // 当前最外层窗口的高度
 const curWinHeight = ref(window.outerHeight);
 window.addEventListener('resize', () => {
-  curWinHeight.value = window.outerHeight;
+  curWinHeight.value = isElectron.value ? window.outerHeight : window.innerHeight;
 });
+
+onMounted(() => {
+  isElectron.value = store.state.basicData.isElectron;
+  if (!isElectron.value) {
+    curWinHeight.value = window.innerHeight;
+  }
+})
 </script>
 
 <style scoped>

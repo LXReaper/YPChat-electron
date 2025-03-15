@@ -1,8 +1,27 @@
-export const api = {
-    prodBaseUrl: "http://localhost:8020/api",
+const prodDomain = "106.52.89.199";
+
+// 后端路径分类列表
+const BaseUrlList = {
+    prodBaseUrl: `http://${prodDomain}/api`,
     devBaseUrl: "http://localhost:8020/api",
-    chatConnectUrl: "ws://localhost:8020/api/ws/connect",
-    conferenceConnectUrl: "ws://localhost:8020/api/signalling/connect",
+}
+
+// 后端基本连接的ws路径分类列表
+const chatConnectUrlList = {
+    prodChatConnectUrl: `ws://${prodDomain}/api/ws/connect`,
+    devChatConnectUrl: "ws://localhost:8020/api/ws/connect",
+}
+
+// 后端音视频 或 会议使用的ws路径分类列表
+const conferenceConnectUrlList = {
+    prodConferenceConnectUrl: `ws://${prodDomain}/api/signalling/connect`,
+    devConferenceConnectUrl: "ws://localhost:8020/api/signalling/connect",
+}
+
+export const api = {
+    baseUrl: BaseUrlList.devBaseUrl,
+    chatConnectUrl: chatConnectUrlList.devChatConnectUrl,
+    conferenceConnectUrl: conferenceConnectUrlList.devConferenceConnectUrl,
     /*---------------------------用户接口---------------------------*/
     // 用户注册
     USER_REGISTER: "/user/register",

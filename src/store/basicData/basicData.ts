@@ -5,7 +5,7 @@ import {StoreOptions} from "vuex";
 import {UserService} from "../../api/Services/UserService.ts";
 import store from "../index.ts";
 import {ElMessage, ElNotification} from "element-plus";
-import {getUserInfoStorage} from "../../utils/storageUtil.js";
+import {getUserInfoStorage} from "../../utils/storageUtil.ts";
 import {CommonConstant} from "../../constant/CommonConstant.ts";
 import {FileService} from "../../api/Services/FileService.ts";
 import {AxiosProgressEvent} from "axios";
@@ -27,7 +27,7 @@ export type ReUploadFileRequest = {
 export const basicData = {
     namespaced: true,
     state: () => ({
-        isElectron: false,
+        isElectron: true,
         // 窗口相关的参数
         win: {
             width: 320,
@@ -373,7 +373,7 @@ export const basicData = {
         },
         // 清空所有数据
         clearAllData(state){
-            state.isElectron = false;
+            state.isElectron = !!(window as any).electronAPI;
             // 窗口相关的参数
             state.win= {
                 width: 320,
@@ -394,6 +394,10 @@ export const basicData = {
         }
     },
     getters: {
+        // 返回当前是否是electron客户端
+        getElectronStatus(state) {
+          return state.isElectron;
+        },
         getCurContactor(state) {
             if (state.selectContactorIndex === -1) return null;
             return state.contactorList[state.selectContactorIndex];
@@ -417,6 +421,6 @@ export const basicData = {
             if (!state.contactorList[state.selectContactorIndex]) return ;
             let contactorId = state.contactorList[state.selectContactorIndex].id;
             return state.filesUploadQueues[contactorId] || [];
-        }
+        },
     }
 } as StoreOptions<any>;

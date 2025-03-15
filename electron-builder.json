@@ -1,0 +1,30 @@
+{
+  "appId": "com.yyp.MineChat",
+  "productName": "MineChat",
+  "copyright": "Copyright © 2025 YYP",
+  "win": {
+    "icon": "./electron/icon/favicon.ico",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "mac": {
+    "category": "public.app-category.utilities"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": true,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": true
+  },
+  "files": [
+    "electron/**/*"
+  ],
+  "directories": {
+    "buildResources": "assets",
+    "output": "release"
+  }
+}

@@ -1,6 +1,6 @@
 import {MsgTypeConstant} from "../../constant/MsgTypeConstant.ts";
 import store from "../../store";
-import {getUserInfoStorage} from "../storageUtil.js";
+import {getUserInfoStorage, setCurContactorInfoStorage} from "../storageUtil.ts";
 import {UserService} from "../../api/Services/UserService";
 
 
@@ -59,23 +59,34 @@ export const handleInvitation = (message: any) => {
                 }).then((res: any) => {
                     if (res.code === 0) {
                         //获取自定义electronAPI上下文
-                        let electron = (window as any).electronAPI;
-                        electron.sendMessage('openChildWindow',{
-                            winName: winName,
-                            path: path,
-                            resizable: false,
-                            x: initX,
-                            y: initY,
-                            width: initWidth,
-                            height: initHeight,
-                            maximizable: false, //不允许放大
-                            transportObj: JSON.stringify({
+                        let isElectron = store.state.basicData.isElectron;
+                        if (isElectron) {
+                            let electron = (window as any).electronAPI;
+                            electron.sendMessage('openChildWindow',{
+                                winName: winName,
+                                path: path,
+                                resizable: false,
+                                x: initX,
+                                y: initY,
+                                width: initWidth,
+                                height: initHeight,
+                                maximizable: false, //不允许放大
+                                transportObj: JSON.stringify({
+                                    ...res.data,
+                                    roomId: roomId,
+                                    msgType: MsgTypeConstant.INVITE_JOIN_ROOM,
+                                    user_id: getUserInfoStorage().id,// 加入房间的用户
+                                }),
+                            })
+                        }else {
+                            setCurContactorInfoStorage({
                                 ...res.data,
                                 roomId: roomId,
                                 msgType: MsgTypeConstant.INVITE_JOIN_ROOM,
                                 user_id: getUserInfoStorage().id,// 加入房间的用户
-                            }),
-                        })
+                            });
+                            window.open(`/#${path}`, "_blank");
+                        }
                     }else {
                         console.error("对方用户信息获取请求失败，" + res.message);
                     }
